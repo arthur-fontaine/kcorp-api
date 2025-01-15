@@ -10,8 +10,10 @@ import (
 	"time"
 
 	ics "github.com/arran4/golang-ical"
+	"github.com/arthur-fontaine/kcorp-api/internal/domain/league"
 	"github.com/arthur-fontaine/kcorp-api/internal/domain/match"
 	"github.com/arthur-fontaine/kcorp-api/internal/repository/leagueoflegends"
+	"github.com/arthur-fontaine/kcorp-api/internal/repository/valorant"
 	"github.com/arthur-fontaine/kcorp-api/internal/usecase/matchservice"
 )
 
@@ -62,12 +64,28 @@ func main() {
 func getCalendar() (*ics.Calendar, error) {
 	cal := ics.NewCalendar()
 
-	lecRepository, err := leagueoflegends.NewLolMatchRepository("KC", leagueoflegends.LECLeagueID, "en-US")
+	lecRepository, err := leagueoflegends.NewLolMatchRepository(leagueoflegends.LECLeagueID, "en-US")
 	if err != nil {
 		return nil, err
 	}
 
-	lflRepository, err := leagueoflegends.NewLolMatchRepository("KCB", leagueoflegends.LFLLeagueID, "en-US")
+	lflRepository, err := leagueoflegends.NewLolMatchRepository(leagueoflegends.LFLLeagueID, "en-US")
+	if err != nil {
+		return nil, err
+	}
+
+	vclRepository, err := valorant.NewValorantMatchRepository(league.League{
+		ID:   valorant.VCL2025LeagueID, // TODO: Automatically get the league ID (because it will change really often)
+		Name: "VCL",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	vctRepository, err := valorant.NewValorantMatchRepository(league.League{
+		ID:   valorant.VCTKickoff2025LeagueID, // TODO: Automatically get the league ID (because it will change really often)
+		Name: "VCT",
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -75,9 +93,11 @@ func getCalendar() (*ics.Calendar, error) {
 	ms := matchservice.NewMatchService([]match.Repository{
 		lecRepository,
 		lflRepository,
+		vclRepository,
+		vctRepository,
 	})
 
-	matches, err := ms.FindNextMatches()
+	matches, err := ms.FindNextMatches([]string{"KCORP Blue Stars", "Karmine Corp", "KC", "KCB"})
 	if err != nil {
 		return nil, err
 	}

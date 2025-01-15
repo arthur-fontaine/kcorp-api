@@ -13,9 +13,8 @@ import (
 )
 
 type leagueOfLegendsMatchRepository struct {
-	league   league.League
-	api      *leagueoflegendsapi.LeagueOfLegendsAPI
-	teamCode string
+	league league.League
+	api    *leagueoflegendsapi.LeagueOfLegendsAPI
 }
 
 const (
@@ -24,7 +23,6 @@ const (
 )
 
 func NewLolMatchRepository(
-	teamCode string,
 	leagueId string,
 	lang string,
 ) (match.Repository, error) {
@@ -49,9 +47,8 @@ func NewLolMatchRepository(
 	}
 
 	matchRepository := leagueOfLegendsMatchRepository{
-		league:   l,
-		api:      api,
-		teamCode: teamCode,
+		league: l,
+		api:    api,
 	}
 	return matchRepository, nil
 }
@@ -67,9 +64,6 @@ func (m leagueOfLegendsMatchRepository) FindNextMatches(ctx context.Context) ([]
 		t, err := time.Parse(time.RFC3339, event.StartTime)
 		if err != nil {
 			return nil, err
-		}
-		if event.Match.Teams[0].Code != m.teamCode && event.Match.Teams[1].Code != m.teamCode {
-			continue
 		}
 		match := match.Match{
 			ID:       event.Match.Id,
@@ -87,8 +81,6 @@ func (m leagueOfLegendsMatchRepository) FindNextMatches(ctx context.Context) ([]
 		}
 		matches = append(matches, match)
 	}
-
-	log.Printf("Found %d matches for team %s in league %s", len(matches), m.teamCode, m.league.Name)
 
 	return matches, nil
 }
