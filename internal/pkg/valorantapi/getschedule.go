@@ -25,7 +25,7 @@ func (v *ValorantAPI) GetSchedule(ctx context.Context, leagueId string) (Schedul
 		if strings.Contains(rawDate, "TBD") || strings.Contains(rawTime, "TBD") {
 			return
 		}
-		startTime, err := time.Parse("Mon, January 2, 2006 3:04 PM", fmt.Sprintf("%s %s", rawDate, rawTime))
+		startTime, err := time.Parse("Mon, January 2, 2006 3:04 PM MST", fmt.Sprintf("%s %s CET", rawDate, rawTime))
 		if err != nil {
 			eventErrors = append(eventErrors, err)
 			return

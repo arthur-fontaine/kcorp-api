@@ -111,12 +111,24 @@ func getCalendar() (*ics.Calendar, error) {
 		event.SetDuration(m.Duration)
 		event.SetURL(m.StreamURL)
 		event.SetSummary(summary)
+		event.SetLastModifiedAt(time.Now())
+		event.SetSequence(calculateSequenceFromEventID(m.ID))
 	}
 
 	events := cal.Events()
 	log.Printf("Calendar initialized with %d events", len(events))
 
 	return cal, nil
+}
+
+func calculateSequenceFromEventID(eventID string) int {
+	var sequence int
+	for _, char := range eventID {
+		if char >= '0' && char <= '9' {
+			sequence = sequence*10 + int(char-'0')
+		}
+	}
+	return sequence
 }
 
 func monitorEvent(eventName string) {
