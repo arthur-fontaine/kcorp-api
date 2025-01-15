@@ -59,9 +59,15 @@ func (m leagueOfLegendsMatchRepository) FindNextMatches(ctx context.Context) ([]
 		return nil, err
 	}
 
+	location, err := time.LoadLocation("CET") // TODO: Move this in a config var
+	if err != nil {
+		log.Printf("Error loading location: %s", err)
+		return nil, err
+	}
+
 	matches := make([]match.Match, 0)
 	for _, event := range events {
-		t, err := time.Parse(time.RFC3339, event.StartTime)
+		t, err := time.ParseInLocation(time.RFC3339, event.StartTime, location)
 		if err != nil {
 			return nil, err
 		}
