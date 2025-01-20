@@ -21,8 +21,12 @@ func (v *ValorantAPI) GetSchedule(ctx context.Context, leagueId string) (Schedul
 	eventErrors := []error{}
 
 	doc.Find(".match-item").Each(func(i int, s *goquery.Selection) {
-		rawTime := strings.Trim(s.Find(".match-item-time").Text(), " \n\t")                          // " 12:00 PM "
-		rawDate := strings.Trim(strings.Replace(s.Parent().Prev().Text(), "Today", "", -1), " \n\t") // "Sat, January 11, 2025"
+		rawTime := strings.Trim(s.Find(".match-item-time").Text(), " \n\t") // " 12:00 PM "
+		rawDate := s.Parent().Prev().Text()
+		rawDate = strings.Replace(rawDate, "Today", "", -1)
+		rawDate = strings.Replace(rawDate, "Tomorrow", "", -1)
+		rawDate = strings.Replace(rawDate, "Yesterday", "", -1)
+		rawDate = strings.Trim(rawDate, " \n\t") // "Sat, January 11, 2025"
 		if strings.Contains(rawDate, "TBD") || strings.Contains(rawTime, "TBD") {
 			return
 		}
@@ -33,7 +37,7 @@ func (v *ValorantAPI) GetSchedule(ctx context.Context, leagueId string) (Schedul
 		}
 		startTime, err := time.ParseInLocation("Mon, January 2, 2006 3:04 PM MST", fmt.Sprintf("%s %s CET", rawDate, rawTime), location)
 		if err != nil {
-			eventErrors = append(eventErrors, err)
+			eventErrors = append(eventErrors, fmt.Errorf("error parsing time: %s", err))
 			return
 		}
 
