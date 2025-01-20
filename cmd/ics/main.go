@@ -97,7 +97,7 @@ func getCalendar() (*ics.Calendar, error) {
 		vctRepository,
 	})
 
-	matches, err := ms.FindNextMatches([]string{"KCORP Blue Stars", "Karmine Corp", "KC", "KCB"})
+	matches, err := ms.FindNextMatches([]string{"KCORP Blue Stars", "Karmine Corp", "KC", "KCB", "Karmine Corp Blue"})
 	if err != nil {
 		return nil, err
 	}
