@@ -63,6 +63,11 @@ func main() {
 
 func getCalendar() (*ics.Calendar, error) {
 	cal := ics.NewCalendar()
+	cal.SetMethod(ics.MethodPublish)
+	cal.SetProductId("-//KCorp//KCorp API//EN")
+	cal.SetName("Karmine Corp Calendar")
+	cal.SetCalscale("GREGORIAN")
+	cal.SetTzid("Europe/Paris")
 
 	lecRepository, err := leagueoflegends.NewLolMatchRepository(leagueoflegends.LECLeagueID, "en-US")
 	if err != nil {
@@ -111,24 +116,17 @@ func getCalendar() (*ics.Calendar, error) {
 		event.SetDuration(m.Duration)
 		event.SetURL(m.StreamURL)
 		event.SetSummary(summary)
-		event.SetLastModifiedAt(time.Now())
-		event.SetSequence(calculateSequenceFromEventID(m.ID))
 	}
+
+	testEvent := cal.AddEvent("test")
+	testEvent.SetStartAt(time.Date(2024, 10, 2, 3, 0, 0, 0, time.UTC))
+	testEvent.SetDuration(1 * time.Hour)
+	testEvent.SetSummary("Test event")
 
 	events := cal.Events()
 	log.Printf("Calendar initialized with %d events", len(events))
 
 	return cal, nil
-}
-
-func calculateSequenceFromEventID(eventID string) int {
-	var sequence int
-	for _, char := range eventID {
-		if char >= '0' && char <= '9' {
-			sequence = sequence*10 + int(char-'0')
-		}
-	}
-	return sequence
 }
 
 func monitorEvent(eventName string) {
