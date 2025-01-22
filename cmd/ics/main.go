@@ -118,11 +118,6 @@ func getCalendar() (*ics.Calendar, error) {
 		event.SetSummary(summary)
 	}
 
-	testEvent := cal.AddEvent("test")
-	testEvent.SetStartAt(time.Date(2024, 10, 2, 3, 0, 0, 0, time.UTC))
-	testEvent.SetDuration(1 * time.Hour)
-	testEvent.SetSummary("Test event")
-
 	events := cal.Events()
 	log.Printf("Calendar initialized with %d events", len(events))
 
