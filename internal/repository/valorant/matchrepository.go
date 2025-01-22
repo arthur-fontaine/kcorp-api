@@ -50,7 +50,7 @@ func (m valorantMatchRepository) FindNextMatches(ctx context.Context) ([]match.M
 				Name: event.Match.Teams[1].Name,
 			},
 			DateTime: event.StartTime,
-			Duration: time.Duration(1) * time.Hour,
+			Duration: time.Duration(1*3) * time.Hour, // 1*3 is because we suppose that every match is a bo3 (one game is 1 hour)
 		})
 	}
 

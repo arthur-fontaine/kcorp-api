@@ -74,7 +74,7 @@ func (m leagueOfLegendsMatchRepository) FindNextMatches(ctx context.Context) ([]
 		match := match.Match{
 			ID:       event.Match.Id,
 			DateTime: t,
-			Duration: time.Duration(60) * time.Minute,
+			Duration: time.Duration(1*event.Match.Strategy.Count) * time.Hour,
 			HomeTeam: team.Team{
 				ID:   event.Match.Teams[0].Code,
 				Name: event.Match.Teams[0].Name,
