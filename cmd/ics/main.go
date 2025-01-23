@@ -23,25 +23,21 @@ func main() {
 	log.Println("Starting ICS server...")
 
 	log.Println("Initializing calendar...")
-	cal, err := getCalendar()
+	matchesByLeague, err := getMatchesByLeague()
 	if err != nil {
 		panic(err)
 	}
-
-	calSerialized := cal.Serialize()
 
 	go func() {
 		// Refresh calendar every 5 minutes
 		for {
 			time.Sleep(5 * time.Minute)
 
-			cal, err := getCalendar()
+			matchesByLeague, err = getMatchesByLeague()
 			if err != nil {
 				log.Println("Error refreshing calendar:", err)
 				continue
 			}
-
-			calSerialized = cal.Serialize()
 		}
 	}()
 
@@ -50,6 +46,12 @@ func main() {
 		w.Header().Set("Content-Type", "text/calendar")
 		w.Header().Set("Content-Disposition", "attachment; filename=calendar.ics")
 		w.Header().Set("Cache-Control", "max-age=300")
+
+		leagues := r.URL.Query()["leagues"]
+		log.Println("Loading calendar for leagues:", leagues)
+		calSerialized := matchesByLeague.Serialize(leagues...)
+		log.Println("Sending calendar with", len(calSerialized), "bytes")
+
 		w.Write([]byte(calSerialized))
 	})
 
@@ -61,22 +63,20 @@ func main() {
 	log.Fatal("Error starting ICS server:", http.ListenAndServe(":"+port, nil))
 }
 
-func getCalendar() (*ics.Calendar, error) {
-	cal := ics.NewCalendar()
-	cal.SetMethod(ics.MethodPublish)
-	cal.SetProductId("-//KCorp//KCorp API//EN")
-	cal.SetName("Karmine Corp Calendar")
-	cal.SetCalscale("GREGORIAN")
-	cal.SetTzid("Europe/Paris")
+type MatchesByLeague struct {
+	matches        map[string][]match.Match
+	serializeCache map[string]string
+}
 
+func getMatchesByLeague() (MatchesByLeague, error) {
 	lecRepository, err := leagueoflegends.NewLolMatchRepository(leagueoflegends.LECLeagueID, "en-US")
 	if err != nil {
-		return nil, err
+		return MatchesByLeague{}, err
 	}
 
 	lflRepository, err := leagueoflegends.NewLolMatchRepository(leagueoflegends.LFLLeagueID, "en-US")
 	if err != nil {
-		return nil, err
+		return MatchesByLeague{}, err
 	}
 
 	vclRepository, err := valorant.NewValorantMatchRepository(league.League{
@@ -84,7 +84,7 @@ func getCalendar() (*ics.Calendar, error) {
 		Name: "VCL",
 	})
 	if err != nil {
-		return nil, err
+		return MatchesByLeague{}, err
 	}
 
 	vctRepository, err := valorant.NewValorantMatchRepository(league.League{
@@ -92,7 +92,7 @@ func getCalendar() (*ics.Calendar, error) {
 		Name: "VCT",
 	})
 	if err != nil {
-		return nil, err
+		return MatchesByLeague{}, err
 	}
 
 	ms := matchservice.NewMatchService([]match.Repository{
@@ -102,26 +102,76 @@ func getCalendar() (*ics.Calendar, error) {
 		vctRepository,
 	})
 
-	matches, err := ms.FindNextMatches([]string{"KCORP Blue Stars", "Karmine Corp", "KC", "KCB", "Karmine Corp Blue"})
+	matches, err := ms.FindNextMatches()
 	if err != nil {
-		return nil, err
+		return MatchesByLeague{}, err
 	}
 
+	filteredMatches := make([]match.Match, 0, len(matches))
 	for _, m := range matches {
-		summary := fmt.Sprintf("[%s] %s vs %s", m.League.Name, m.HomeTeam.Name, m.AwayTeam.Name)
-		summary = strings.Replace(summary, "La Ligue Française", "LFL", -1)
+		if strings.Contains(m.HomeTeam.Name, "KC") ||
+			strings.Contains(m.AwayTeam.Name, "KC") ||
+			strings.Contains(m.HomeTeam.Name, "Karmine") ||
+			strings.Contains(m.AwayTeam.Name, "Karmine") {
+			filteredMatches = append(filteredMatches, m)
+		}
+	}
 
-		event := cal.AddEvent(m.ID)
-		event.SetStartAt(m.DateTime)
-		event.SetDuration(m.Duration)
-		event.SetURL(m.StreamURL)
-		event.SetSummary(summary)
+	matchesByLeague := MatchesByLeague{
+		matches:        make(map[string][]match.Match),
+		serializeCache: make(map[string]string),
+	}
+	for _, m := range filteredMatches {
+		matchesByLeague.matches[m.League.Name] = append(matchesByLeague.matches[m.League.Name], m)
+	}
+
+	return matchesByLeague, nil
+}
+
+func (m MatchesByLeague) Serialize(leagues ...string) string {
+	cacheKey := strings.Join(leagues, ",")
+
+	if calSerialized, ok := m.serializeCache[cacheKey]; ok {
+		return calSerialized
+	}
+
+	if len(leagues) == 0 {
+		leagues = make([]string, 0, len(m.matches))
+		for k := range m.matches {
+			leagues = append(leagues, k)
+		}
+	}
+
+	cal := ics.NewCalendar()
+	cal.SetMethod(ics.MethodPublish)
+	cal.SetProductId("-//KCorp//KCorp API//EN")
+	cal.SetName("Karmine Corp Calendar")
+	cal.SetCalscale("GREGORIAN")
+	cal.SetTzid("Europe/Paris")
+
+	for _, league := range leagues {
+		matches, ok := m.matches[league]
+		if !ok {
+			continue
+		}
+		for _, m := range matches {
+			summary := fmt.Sprintf("[%s] %s vs %s", m.League.Name, m.HomeTeam.Name, m.AwayTeam.Name)
+			summary = strings.Replace(summary, "La Ligue Française", "LFL", -1)
+
+			event := cal.AddEvent(m.ID)
+			event.SetStartAt(m.DateTime)
+			event.SetDuration(m.Duration)
+			event.SetURL(m.StreamURL)
+			event.SetSummary(summary)
+		}
 	}
 
 	events := cal.Events()
 	log.Printf("Calendar initialized with %d events", len(events))
 
-	return cal, nil
+	calSerialized := cal.Serialize()
+	m.serializeCache[cacheKey] = calSerialized
+	return calSerialized
 }
 
 func monitorEvent(eventName string) {

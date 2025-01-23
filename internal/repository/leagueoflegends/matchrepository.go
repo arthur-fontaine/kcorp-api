@@ -37,7 +37,7 @@ func NewLolMatchRepository(
 		if l1.ID == leagueId {
 			l = league.League{
 				ID:   l1.ID,
-				Name: l1.Name,
+				Name: normalizeLeagueName(l1.Name),
 			}
 			break
 		}
@@ -153,4 +153,13 @@ func (m leagueOfLegendsMatchRepository) paginateGetSchedule(
 	}
 
 	return eventsSlice, nil
+}
+
+func normalizeLeagueName(name string) string {
+	switch name {
+	case "La Ligue Française":
+		return "LFL"
+	default:
+		return name
+	}
 }
