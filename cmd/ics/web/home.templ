@@ -1,0 +1,345 @@
+package web
+
+templ Home() {
+	<html>
+		<head>
+			<meta charset="utf-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1">
+			<title>Karmine Plus — Calendar</title>
+
+			// Alpine.js
+			<script src="//unpkg.com/alpinejs" defer></script>
+
+			// Cairo
+			<link rel="preconnect" href="https://fonts.googleapis.com">
+			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+			<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
+		</head>
+		<body x-data="{ showCopyToast: false }">
+			<main x-data="{
+				vct: true,
+				vcl: true,
+				lec: true,
+				lfl: true,
+				id: Math.random().toString(36).slice(2, 12).toUpperCase(),
+				get url() {
+					return location.href + 'calendar.ics#' + this.id + '?leagues=' + [this.vct && 'VCT', this.vcl && 'VCL', this.lec && 'LEC', this.lfl && 'LFL'].filter(Boolean).join('&leagues=')
+				}
+			}">
+				<h2>Ton URL</h2>
+				<div class="result-box">
+					<code class="url">
+						<span x-text="url"></span>
+					</code>
+					<div class="copy-button" @click="navigator.clipboard.writeText(url).then(() => {
+						showCopyToast = true;
+						setTimeout(() => showCopyToast = false, 2000);
+					})">
+						<img src="https://api.iconify.design/material-symbols:content-copy-outline.svg?color=white&height=20" />
+					</div>
+				</div>
+
+				<h2>Customise les jeux affichés dans ton calendrier</h2>
+				<form>
+					<div class="game-choice">
+						<label>
+							<input type="checkbox" x-model="vct">
+							<img src="/static/vct-logo.webp" alt="VCT" />
+						</label>
+						<label>
+							<input type="checkbox" x-model="vcl">
+							<img src="/static/vcl-logo.webp" alt="VCL" />
+						</label>
+						<label>
+							<input type="checkbox" x-model="lec">
+							<img src="/static/lec-logo.webp" alt="LEC" />
+						</label>
+						<label>
+							<input type="checkbox" x-model="lfl">
+							<img src="/static/lfl-logo.webp" alt="LFL" />
+						</label>
+					</div>
+				</form>
+
+				<h2>Comment utiliser ton calendrier ?</h2>
+				<div x-data="{ selected: 'Google Calendar' }">
+					<div class="calendar-tab-selector">
+						<input type="radio" id="google" name="calendar-tab" value="Google Calendar" x-model="selected">
+						<label for="google">Google Calendar</label>
+
+						<input type="radio" id="apple" name="calendar-tab" value="Apple Calendar" x-model="selected">
+						<label for="apple">Apple Calendar</label>
+
+						<input type="radio" id="outlook" name="calendar-tab" value="Outlook" x-model="selected">
+						<label for="outlook">Outlook</label>
+					</div>
+
+					<div class="instructions">
+						<div x-show="selected === 'Google Calendar'">
+							<h3>Google Calendar</h3>
+							<ul>
+								<li>Va sur <a href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl" target="_blank" rel="noopener noreferrer">https://calendar.google.com/calendar/u/0/r/settings/addbyurl</a></li>
+								<li>Copie ton adresse (<a x-text="url" href="url"></a>)</li>
+								<li>Colle-la dans le champ "URL de l'agenda"</li>
+								<li>Appuie sur "Ajouter un agenda"</li>
+							</ul>
+						</div>
+
+						<div x-show="selected === 'Apple Calendar'">
+							<h3>Apple Calendar</h3>
+							<ul>
+								<li>Ouvre l'application Calendrier sur ton iPhone</li>
+								<li>Appuie sur "Calendriers" en bas de l'écran</li>
+								<li>Appuie sur "Nouv. calendrier" en bas à gauche</li>
+								<li>Appuie sur "Ajouter un calendrier avec abonnement"</li>
+								<li>Colle ton adresse (<a x-text="url" href="url"></a>)</li>
+								<li>Appuie sur "S'abonner"</li>
+							</ul>
+						</div>
+
+						<div x-show="selected === 'Outlook'">
+							<h3>Outlook</h3>
+							<ul>
+								<li>Va sur <a href="https://outlook.live.com/calendar/0/addcalendar" target="_blank" rel="noopener noreferrer">https://outlook.live.com/calendar/0/addcalendar</a></li>
+								<li>Clique sur "S'abonner à partir du Web"</li>
+								<li>Copie-colle ton adresse (<a x-text="url" href="url"></a>)</li>
+								<li>Appuie sur "Importer"</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</main>
+
+			<div class="copy-toast" @click="showCopyToast = false" x-bind:data-show="showCopyToast">
+				<p>URL copiée !</p>
+			</div>
+		</body>
+
+		<style>
+			:root {
+				--background-color: #101E35;
+				--text-color: #fff;
+				--accent-color: #00CCFF;
+			}
+
+			body {
+				margin: 0;
+				padding: 0 2rem;
+
+				@media (min-width: 600px) {
+					padding: 3rem 2rem;
+				}
+
+				background-color: var(--background-color);
+				color: var(--text-color);
+
+				display: flex;
+				justify-content: center;
+
+				font-family: 'Cairo', sans-serif;
+
+				font-family: "Cairo", serif;
+				font-optical-sizing: auto;
+				font-weight: 400;
+				font-style: normal;
+				font-variation-settings: "slnt" 0;
+			}
+
+			main::after {
+				content: "";
+				height: 3rem;
+				@media (min-width: 600px) {
+					height: 6rem;
+				}
+				display: block;
+				width: 100%;
+			}
+
+			main {
+				min-width: min(600px, calc(90vw - 5rem));
+				max-width: 600px;
+			}
+
+			h2 {
+				margin-bottom: 1rem;
+				margin-top: 3rem;
+
+				font-size: 1.1rem;
+				font-weight: 500;
+			}
+
+			a {
+				color: var(--accent-color);
+			}
+
+			.game-choice {
+				display: grid;
+				grid-template-columns: auto auto auto;
+				gap: 1rem;
+
+				justify-items: center;
+				align-items: center;
+
+				> * {
+					padding: 1rem;
+				}
+			}
+
+			.result-box {
+				margin-bottom: 3rem;
+
+				border: 1px solid var(--accent-color);
+				border-radius: 1rem;
+
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+
+				height: 3.25rem;
+
+				code {
+					width: 100%;
+
+					overflow-x: auto;
+					white-space: nowrap;
+
+					font-size: 1.1rem;
+
+					padding: 1rem;
+					padding-right: 0;
+
+					@media (hover: hover) {
+						height: calc(100% - 2rem);
+						overflow-y: hidden;
+						scrollbar-color: transparent transparent;
+
+						&:hover {
+							scrollbar-color: gray var(--background-color);
+						}
+					}
+				}
+
+				.copy-button {
+					cursor: pointer;
+					padding: 1rem;
+					border-radius: inherit;
+				}
+
+				@media (hover: hover) {
+					.copy-button:hover {
+						background-color: color-mix(in srgb, var(--text-color), transparent 80%);
+					}
+				}
+			}
+
+			.game-choice label {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+
+				padding: 1rem;
+				border-radius: 0.5rem;
+				aspect-ratio: 1 / 1;
+
+				@media (min-width: 600px) {
+					padding: 2rem;
+				}
+
+				&:has(input[type="checkbox"]:checked) {
+					background-color: color-mix(in srgb, var(--accent-color), transparent 80%);
+					outline: 2px solid var(--accent-color);
+				}
+			}
+
+			input[type="checkbox"] {
+				display: none;
+
+				& + img {
+					cursor: pointer;
+					object-fit: contain;
+
+					width: 100%;
+					aspect-ratio: 1 / 1;
+				}
+			}
+
+			input[type="checkbox"]:checked {
+				background-color: var(--accent-color);
+				position: relative;
+			}
+
+			.calendar-tab-selector {
+				display: grid;
+				grid-template-columns: auto auto auto;
+				gap: 1rem;
+				justify-items: center;
+
+				input[type="radio"] {
+					display: none;
+
+					& + label {
+						cursor: pointer;
+						
+						font-size: 1rem;
+						font-weight: 300;
+					}
+
+					&:checked + label {
+						border-bottom: 2px solid var(--accent-color);
+					}
+				}
+			}
+
+			.instructions {
+				word-break: break-word;
+
+				margin: 2rem 3rem 0 3rem;
+				padding: 2rem;
+				border-radius: 1rem;
+
+				border: 1px solid var(--accent-color);
+
+				li {
+					list-style-type: '- ';
+					line-height: 1.5;
+					margin-block: 0.5rem;
+				}
+
+				@media (max-width: 600px) {
+					margin: 2rem 1rem 0 1rem;
+				}
+
+				*:first-child {
+					margin-top: 0;
+				}
+
+				*:last-child {
+					margin-bottom: 0;
+				}
+			}
+
+			.copy-toast {
+				position: fixed;
+				bottom: 2rem;
+				right: 2rem;
+
+				background-color: var(--accent-color);
+				color: var(--background-color);
+
+				padding: 1rem;
+				border-radius: 1rem;
+
+				transition: transform 0.3s;
+				transform: translateY(calc(100% + 2rem));
+
+				p {
+					margin: 0;
+				}
+
+				&[data-show="true"] {
+					transform: translateY(0);
+				}
+			}
+		</style>
+	</html>
+}

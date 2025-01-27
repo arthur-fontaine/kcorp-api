@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	ics "github.com/arran4/golang-ical"
+	"github.com/arthur-fontaine/kcorp-api/cmd/ics/web"
 	"github.com/arthur-fontaine/kcorp-api/internal/domain/league"
 	"github.com/arthur-fontaine/kcorp-api/internal/domain/match"
 	"github.com/arthur-fontaine/kcorp-api/internal/repository/leagueoflegends"
@@ -53,6 +55,14 @@ func main() {
 		log.Println("Sending calendar with", len(calSerialized), "bytes")
 
 		w.Write([]byte(calSerialized))
+	})
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		web.Home().Render(context.TODO(), w)
+	})
+
+	http.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
+		http.StripPrefix("/static/", http.FileServer(http.Dir("cmd/ics/web/static"))).ServeHTTP(w, r)
 	})
 
 	port := os.Getenv("KCORP_API_ICS_PORT")
