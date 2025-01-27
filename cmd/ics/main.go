@@ -45,14 +45,15 @@ func main() {
 
 	http.HandleFunc("/calendar.ics", func(w http.ResponseWriter, r *http.Request) {
 		go monitorEvent("calendar.download")
-		w.Header().Set("Content-Type", "text/calendar")
-		w.Header().Set("Content-Disposition", "attachment; filename=calendar.ics")
-		w.Header().Set("Cache-Control", "max-age=300")
 
 		leagues := r.URL.Query()["leagues"]
 		log.Println("Loading calendar for leagues:", leagues)
 		calSerialized := matchesByLeague.Serialize(leagues...)
 		log.Println("Sending calendar with", len(calSerialized), "bytes")
+
+		w.Header().Set("Content-Type", "text/calendar")
+		w.Header().Set("Content-Disposition", "attachment; filename=calendar.ics")
+		w.Header().Set("Cache-Control", "max-age=300")
 
 		w.Write([]byte(calSerialized))
 	})

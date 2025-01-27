@@ -23,7 +23,7 @@ templ Home() {
 				lfl: true,
 				id: Math.random().toString(36).slice(2, 12).toUpperCase(),
 				get url() {
-					return location.href + 'calendar.ics#' + this.id + '?leagues=' + [this.vct && 'VCT', this.vcl && 'VCL', this.lec && 'LEC', this.lfl && 'LFL'].filter(Boolean).join('&leagues=')
+					return location.href + 'calendar.ics' + '?leagues=' + [this.vct && 'VCT', this.vcl && 'VCL', this.lec && 'LEC', this.lfl && 'LFL'].filter(Boolean).join('&leagues=') + '#' + this.id
 				}
 			}">
 				<h2>Ton URL</h2>
