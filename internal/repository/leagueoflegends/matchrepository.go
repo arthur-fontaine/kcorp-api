@@ -71,6 +71,9 @@ func (m leagueOfLegendsMatchRepository) FindNextMatches(ctx context.Context) ([]
 		if err != nil {
 			return nil, err
 		}
+		if (len(event.Match.Teams) != 2) || (event.Match.Strategy.Count == 0) {
+			continue
+		}
 		match := match.Match{
 			ID:       event.Match.Id,
 			DateTime: t,
