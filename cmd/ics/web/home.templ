@@ -15,7 +15,7 @@ templ Home() {
 			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 			<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
 		</head>
-		<body>
+		<body x-data="{ showCopyToast: false }">
 			<main x-data="{
 				vct: true,
 				vcl: true,
@@ -23,7 +23,7 @@ templ Home() {
 				lfl: true,
 				id: Math.random().toString(36).slice(2, 12).toUpperCase(),
 				get url() {
-					return location.href + 'calendar.ics#' + this.id + '?leagues=' + [this.vct && 'VCT', this.vcl && 'VCL', this.lec && 'LEC', this.lfl && 'LFL'].filter(Boolean).join(',')
+					return location.href + 'calendar.ics#' + this.id + '?leagues=' + [this.vct && 'VCT', this.vcl && 'VCL', this.lec && 'LEC', this.lfl && 'LFL'].filter(Boolean).join('&leagues=')
 				}
 			}">
 				<h2>Ton URL</h2>
@@ -31,7 +31,10 @@ templ Home() {
 					<code class="url">
 						<span x-text="url"></span>
 					</code>
-					<div class="copy-button">
+					<div class="copy-button" @click="navigator.clipboard.writeText(url).then(() => {
+						showCopyToast = true;
+						setTimeout(() => showCopyToast = false, 2000);
+					})">
 						<img src="https://api.iconify.design/material-symbols:content-copy-outline.svg?color=white&height=20" />
 					</div>
 				</div>
@@ -106,6 +109,10 @@ templ Home() {
 					</div>
 				</div>
 			</main>
+
+			<div class="copy-toast" @click="showCopyToast = false" x-bind:data-show="showCopyToast">
+				<p>URL copiée !</p>
+			</div>
 		</body>
 
 		<style>
@@ -117,7 +124,11 @@ templ Home() {
 
 			body {
 				margin: 0;
-				padding: 3rem 2rem;
+				padding: 0 2rem;
+
+				@media (min-width: 600px) {
+					padding: 3rem 2rem;
+				}
 
 				background-color: var(--background-color);
 				color: var(--text-color);
@@ -136,8 +147,11 @@ templ Home() {
 
 			main::after {
 				content: "";
+				height: 3rem;
+				@media (min-width: 600px) {
+					height: 6rem;
+				}
 				display: block;
-				height: 6rem;
 				width: 100%;
 			}
 
@@ -193,6 +207,16 @@ templ Home() {
 
 					padding: 1rem;
 					padding-right: 0;
+
+					@media (hover: hover) {
+						height: calc(100% - 2rem);
+						overflow-y: hidden;
+						scrollbar-color: transparent transparent;
+
+						&:hover {
+							scrollbar-color: gray var(--background-color);
+						}
+					}
 				}
 
 				.copy-button {
@@ -213,9 +237,13 @@ templ Home() {
 				align-items: center;
 				gap: 0.5rem;
 
-				padding: 2rem;
+				padding: 1rem;
 				border-radius: 0.5rem;
 				aspect-ratio: 1 / 1;
+
+				@media (min-width: 600px) {
+					padding: 2rem;
+				}
 
 				&:has(input[type="checkbox"]:checked) {
 					background-color: color-mix(in srgb, var(--accent-color), transparent 80%);
@@ -287,6 +315,29 @@ templ Home() {
 
 				*:last-child {
 					margin-bottom: 0;
+				}
+			}
+
+			.copy-toast {
+				position: fixed;
+				bottom: 2rem;
+				right: 2rem;
+
+				background-color: var(--accent-color);
+				color: var(--background-color);
+
+				padding: 1rem;
+				border-radius: 1rem;
+
+				transition: transform 0.3s;
+				transform: translateY(calc(100% + 2rem));
+
+				p {
+					margin: 0;
+				}
+
+				&[data-show="true"] {
+					transform: translateY(0);
 				}
 			}
 		</style>
