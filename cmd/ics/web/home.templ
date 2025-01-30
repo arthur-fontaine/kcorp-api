@@ -21,10 +21,11 @@ templ Home() {
 				vcl: true,
 				lec: true,
 				lfl: true,
+				rl: true,
 				id: Math.random().toString(36).slice(2, 12).toUpperCase(),
 				get url() {
 					return location.href + 'calendar.ics'+ (
-						this.vct && this.vcl && this.lec && this.lfl ? '' : '?leagues=' + [this.vct && 'VCT', this.vcl && 'VCL', this.lec && 'LEC', this.lfl && 'LFL'].filter(Boolean).join('&leagues=')
+						this.vct && this.vcl && this.lec && this.lfl && this.rl ? '' : '?leagues=' + [this.vct && 'VCT', this.vcl && 'VCL', this.lec && 'LEC', this.lfl && 'LFL', this.rl && 'RL'].filter(Boolean).join('&leagues=')
 					) + '#' + this.id
 				}
 			}">
@@ -59,6 +60,10 @@ templ Home() {
 						<label>
 							<input type="checkbox" x-model="lfl">
 							<img src="/static/lfl-logo.webp" alt="LFL" />
+						</label>
+						<label>
+							<input type="checkbox" x-model="rl">
+							<img src="/static/rl-logo.webp" alt="RL" />
 						</label>
 					</div>
 				</form>
