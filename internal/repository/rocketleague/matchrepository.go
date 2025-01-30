@@ -84,7 +84,7 @@ func (m rocketLeagueMatchRepository) FindNextMatches(ctx context.Context) ([]mat
 				Name: event.Away.Name,
 			},
 			DateTime: date,
-			Duration: 1,
+			Duration: 45 * time.Minute,
 		})
 	}
 
