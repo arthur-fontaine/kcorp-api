@@ -2,6 +2,7 @@ package matchservice
 
 import (
 	"context"
+	"log"
 	"sync"
 
 	"github.com/arthur-fontaine/kcorp-api/internal/domain/match"
@@ -39,6 +40,8 @@ func (m matchService) FindNextMatches() ([]match.Match, error) {
 	if len(errChan) > 0 {
 		return nil, <-errChan
 	}
+
+	log.Printf("Found %d matches\n", len(allMatches))
 
 	return allMatches, nil
 }

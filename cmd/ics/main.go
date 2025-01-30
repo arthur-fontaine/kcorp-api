@@ -12,9 +12,12 @@ import (
 
 	ics "github.com/arran4/golang-ical"
 	"github.com/arthur-fontaine/kcorp-api/cmd/ics/web"
+
 	"github.com/arthur-fontaine/kcorp-api/internal/domain/league"
 	"github.com/arthur-fontaine/kcorp-api/internal/domain/match"
+	"github.com/arthur-fontaine/kcorp-api/internal/repository/cache"
 	"github.com/arthur-fontaine/kcorp-api/internal/repository/leagueoflegends"
+	"github.com/arthur-fontaine/kcorp-api/internal/repository/rocketleague"
 	"github.com/arthur-fontaine/kcorp-api/internal/repository/valorant"
 	"github.com/arthur-fontaine/kcorp-api/internal/usecase/matchservice"
 )
@@ -80,6 +83,8 @@ type MatchesByLeague struct {
 }
 
 func getMatchesByLeague() (MatchesByLeague, error) {
+	cache := cache.NewFileCache("/tmp/kcorp-api-ics/")
+
 	lecRepository, err := leagueoflegends.NewLolMatchRepository(leagueoflegends.LECLeagueID, "en-US")
 	if err != nil {
 		return MatchesByLeague{}, err
@@ -106,11 +111,17 @@ func getMatchesByLeague() (MatchesByLeague, error) {
 		return MatchesByLeague{}, err
 	}
 
+	rlRepository, err := rocketleague.NewRocketLeagueMatchRepository(time.Date(2021, 7, 20, 0, 0, 0, 0, time.UTC), cache)
+	if err != nil {
+		return MatchesByLeague{}, err
+	}
+
 	ms := matchservice.NewMatchService([]match.Repository{
 		lecRepository,
 		lflRepository,
 		vclRepository,
 		vctRepository,
+		rlRepository,
 	})
 
 	matches, err := ms.FindNextMatches()
