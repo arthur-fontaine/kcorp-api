@@ -15,7 +15,8 @@ import (
 
 	"github.com/arthur-fontaine/kcorp-api/internal/domain/league"
 	"github.com/arthur-fontaine/kcorp-api/internal/domain/match"
-	"github.com/arthur-fontaine/kcorp-api/internal/repository/cache"
+	"github.com/arthur-fontaine/kcorp-api/internal/pkg/cache"
+	"github.com/arthur-fontaine/kcorp-api/internal/repository/kameto"
 	"github.com/arthur-fontaine/kcorp-api/internal/repository/leagueoflegends"
 	"github.com/arthur-fontaine/kcorp-api/internal/repository/rocketleague"
 	"github.com/arthur-fontaine/kcorp-api/internal/repository/valorant"
@@ -116,12 +117,20 @@ func getMatchesByLeague() (MatchesByLeague, error) {
 		return MatchesByLeague{}, err
 	}
 
+	lfl2Repository, err := kameto.NewKametoMatchRepository("LeagueOfLegendsDiv2", league.League{
+		Name: "LFL2",
+	})
+	if err != nil {
+		return MatchesByLeague{}, err
+	}
+
 	ms := matchservice.NewMatchService([]match.Repository{
 		lecRepository,
 		lflRepository,
 		vclRepository,
 		vctRepository,
 		rlRepository,
+		lfl2Repository,
 	})
 
 	matches, err := ms.FindNextMatches()

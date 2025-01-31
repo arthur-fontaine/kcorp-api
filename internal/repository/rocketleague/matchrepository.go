@@ -9,8 +9,8 @@ import (
 	"github.com/arthur-fontaine/kcorp-api/internal/domain/league"
 	"github.com/arthur-fontaine/kcorp-api/internal/domain/match"
 	"github.com/arthur-fontaine/kcorp-api/internal/domain/team"
+	"github.com/arthur-fontaine/kcorp-api/internal/pkg/cache"
 	"github.com/arthur-fontaine/kcorp-api/internal/pkg/strafeapi"
-	"github.com/arthur-fontaine/kcorp-api/internal/repository/cache"
 )
 
 type rocketLeagueMatchRepository struct {

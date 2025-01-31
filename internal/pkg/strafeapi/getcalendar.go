@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/arthur-fontaine/kcorp-api/internal/repository/cache"
+	"github.com/arthur-fontaine/kcorp-api/internal/pkg/cache"
 )
 
 func (s *StrafeAPI) GetCalendar(
