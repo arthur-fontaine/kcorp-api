@@ -88,10 +88,6 @@ func (k kametoMatchRepository) FindNextMatches(ctx context.Context) ([]match.Mat
 
 func parsePlayerName(name string) string {
 	players := strings.Split(name, ";")
-	for i, player := range players {
-		players[i] = strings.Replace(player, "KC ", "", 1)
-		players[i] = strings.Trim(players[i], " ")
-	}
 	playersSet := make(map[string]struct{})
 	for _, player := range players {
 		playersSet[player] = struct{}{}
@@ -105,12 +101,12 @@ func parsePlayerName(name string) string {
 
 func normalizePlayerName(name string) string {
 	switch name {
-	case "CANBIZZ":
-		return "Canbizz"
-	case "DOUBLE61":
-		return "Double61"
-	case "WETJUNGLER":
-		return "Wet Jungler"
+	case "KC CANBIZZ":
+		return "KC Canbizz"
+	case "KC DOUBLE61":
+		return "KC Double61"
+	case "KC WETJUNGLER":
+		return "KC Wet Jungler"
 	default:
 		return name
 	}

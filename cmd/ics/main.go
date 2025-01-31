@@ -148,12 +148,6 @@ func getMatchesByLeague() (MatchesByLeague, error) {
 
 	filteredMatches := make([]match.Match, 0, len(matches))
 	for _, m := range matches {
-		if m.AwayTeam.Name == "" {
-			// Means it's a single player match
-			filteredMatches = append(filteredMatches, m)
-			continue
-		}
-
 		if strings.Contains(m.HomeTeam.Name, "KC") ||
 			strings.Contains(m.AwayTeam.Name, "KC") ||
 			strings.Contains(m.HomeTeam.Name, "Karmine") ||
