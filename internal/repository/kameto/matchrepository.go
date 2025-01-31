@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/arthur-fontaine/kcorp-api/internal/domain/league"
@@ -54,14 +55,26 @@ func (k kametoMatchRepository) FindNextMatches(ctx context.Context) ([]match.Mat
 				streamLink = fmt.Sprintf("https://www.twitch.tv/%s", event.StreamLink)
 			}
 
-			matches = append(matches, match.Match{
-				ID: fmt.Sprintf("kameto-%d", event.Id),
-				HomeTeam: team.Team{
+			var homeTeam team.Team
+			var awayTeam team.Team
+
+			if event.Player != "null" {
+				homeTeam = team.Team{
+					Name: parsePlayerName(event.Player),
+				}
+			} else {
+				homeTeam = team.Team{
 					Name: event.TeamHomeName,
-				},
-				AwayTeam: team.Team{
+				}
+				awayTeam = team.Team{
 					Name: event.TeamAwayName,
-				},
+				}
+			}
+
+			matches = append(matches, match.Match{
+				ID:        fmt.Sprintf("kameto-%d", event.Id),
+				HomeTeam:  homeTeam,
+				AwayTeam:  awayTeam,
 				League:    k.league,
 				StreamURL: streamLink,
 				DateTime:  startDate,
@@ -71,4 +84,34 @@ func (k kametoMatchRepository) FindNextMatches(ctx context.Context) ([]match.Mat
 	}
 
 	return matches, nil
+}
+
+func parsePlayerName(name string) string {
+	players := strings.Split(name, ";")
+	for i, player := range players {
+		players[i] = strings.Replace(player, "KC ", "", 1)
+		players[i] = strings.Trim(players[i], " ")
+	}
+	playersSet := make(map[string]struct{})
+	for _, player := range players {
+		playersSet[player] = struct{}{}
+	}
+	players = make([]string, 0, len(playersSet))
+	for player := range playersSet {
+		players = append(players, normalizePlayerName(player))
+	}
+	return strings.Join(players, " & ")
+}
+
+func normalizePlayerName(name string) string {
+	switch name {
+	case "CANBIZZ":
+		return "Canbizz"
+	case "DOUBLE61":
+		return "Double61"
+	case "WETJUNGLER":
+		return "Wet Jungler"
+	default:
+		return name
+	}
 }

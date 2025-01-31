@@ -124,6 +124,13 @@ func getMatchesByLeague() (MatchesByLeague, error) {
 		return MatchesByLeague{}, err
 	}
 
+	tftRepository, err := kameto.NewKametoMatchRepository("TFT", league.League{
+		Name: "TFT",
+	})
+	if err != nil {
+		return MatchesByLeague{}, err
+	}
+
 	ms := matchservice.NewMatchService([]match.Repository{
 		lecRepository,
 		lflRepository,
@@ -131,6 +138,7 @@ func getMatchesByLeague() (MatchesByLeague, error) {
 		vctRepository,
 		rlRepository,
 		lfl2Repository,
+		tftRepository,
 	})
 
 	matches, err := ms.FindNextMatches()
@@ -140,6 +148,12 @@ func getMatchesByLeague() (MatchesByLeague, error) {
 
 	filteredMatches := make([]match.Match, 0, len(matches))
 	for _, m := range matches {
+		if m.AwayTeam.Name == "" {
+			// Means it's a single player match
+			filteredMatches = append(filteredMatches, m)
+			continue
+		}
+
 		if strings.Contains(m.HomeTeam.Name, "KC") ||
 			strings.Contains(m.AwayTeam.Name, "KC") ||
 			strings.Contains(m.HomeTeam.Name, "Karmine") ||
@@ -186,7 +200,12 @@ func (m MatchesByLeague) Serialize(leagues ...string) string {
 			continue
 		}
 		for _, m := range matches {
-			summary := fmt.Sprintf("[%s] %s vs %s", m.League.Name, m.HomeTeam.Name, m.AwayTeam.Name)
+			var summary string
+			if m.AwayTeam.Name != "" {
+				summary = fmt.Sprintf("[%s] %s vs %s", m.League.Name, m.HomeTeam.Name, m.AwayTeam.Name)
+			} else {
+				summary = fmt.Sprintf("[%s] %s", m.League.Name, m.HomeTeam.Name)
+			}
 			summary = strings.Replace(summary, "La Ligue Française", "LFL", -1)
 
 			event := cal.AddEvent(m.ID)

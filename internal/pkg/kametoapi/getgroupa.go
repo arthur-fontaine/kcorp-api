@@ -35,4 +35,5 @@ type Event struct {
 	TeamAwayImage   string `json:"team_exterieur"`
 	TeamHomeName    string `json:"team_name_domicile"`
 	TeamAwayName    string `json:"team_name_exterieur"`
+	Player          string `json:"player"`
 }
