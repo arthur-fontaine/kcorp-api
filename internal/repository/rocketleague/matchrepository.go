@@ -44,7 +44,7 @@ func (m rocketLeagueMatchRepository) FindNextMatches(ctx context.Context) ([]mat
 				defer func() { <-sem }() // release the slot
 
 				var c cache.Cache
-				if date.Before(time.Now()) {
+				if date.Before(time.Now().AddDate(0, 0, -2)) {
 					c = m.cache
 				}
 
