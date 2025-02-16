@@ -112,6 +112,11 @@ func getMatchesByLeague() (MatchesByLeague, error) {
 		return MatchesByLeague{}, err
 	}
 
+	vctGcRepository, err := valorant.NewValorantMatchRepository(league.League{
+		ID:   valorant.VCTGC2025Stage1LeagueID, // TODO: Automatically get the league ID (because it will change really often)
+		Name: "VCT GC",
+	})
+
 	rlRepository, err := rocketleague.NewRocketLeagueMatchRepository(time.Date(2021, 7, 20, 0, 0, 0, 0, time.UTC), cache)
 	if err != nil {
 		return MatchesByLeague{}, err
@@ -136,6 +141,7 @@ func getMatchesByLeague() (MatchesByLeague, error) {
 		lflRepository,
 		vclRepository,
 		vctRepository,
+		vctGcRepository,
 		rlRepository,
 		lfl2Repository,
 		tftRepository,

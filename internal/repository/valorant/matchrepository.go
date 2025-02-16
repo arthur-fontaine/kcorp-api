@@ -16,8 +16,9 @@ type valorantMatchRepository struct {
 }
 
 const (
-	VCL2025LeagueID        = "2315"
-	VCTKickoff2025LeagueID = "2276"
+	VCL2025LeagueID         = "2315"
+	VCTKickoff2025LeagueID  = "2276"
+	VCTGC2025Stage1LeagueID = "2354"
 )
 
 func NewValorantMatchRepository(
