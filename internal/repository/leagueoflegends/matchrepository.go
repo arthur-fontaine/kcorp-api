@@ -18,12 +18,16 @@ type leagueOfLegendsMatchRepository struct {
 }
 
 const (
-	LECLeagueID = "98767991302996019"
-	LFLLeagueID = "105266103462388553"
+	LECLeagueID         = "98767991302996019"
+	LFLLeagueID         = "105266103462388553"
+	FirstStandLeagueID  = "113464388705111224"
+	WorldsLeagueID      = "98767975604431411"
+	MSILeagueID         = "98767991325878492"
+	EmeaMastersLeagueID = "100695891328981122"
 )
 
 func NewLolMatchRepository(
-	leagueId string,
+	league_ league.League,
 	lang string,
 ) (match.Repository, error) {
 	api := leagueoflegendsapi.NewLeagueOfLegendsAPI(lang)
@@ -34,16 +38,22 @@ func NewLolMatchRepository(
 
 	var l league.League
 	for _, l1 := range leagues {
-		if l1.ID == leagueId {
+		if l1.ID == league_.ID {
+			var leagueName string
+			if league_.Name == "" {
+				leagueName = normalizeLeagueName(l1.Name)
+			} else {
+				leagueName = league_.Name
+			}
 			l = league.League{
 				ID:   l1.ID,
-				Name: normalizeLeagueName(l1.Name),
+				Name: leagueName,
 			}
 			break
 		}
 	}
 	if l.ID == "" {
-		return nil, league.NewLeagueNotFoundError(leagueId)
+		return nil, league.NewLeagueNotFoundError(league_.ID)
 	}
 
 	matchRepository := leagueOfLegendsMatchRepository{

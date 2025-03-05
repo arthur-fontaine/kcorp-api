@@ -86,12 +86,48 @@ type MatchesByLeague struct {
 func getMatchesByLeague() (MatchesByLeague, error) {
 	cache := cache.NewFileCache("/tmp/kcorp-api-ics/")
 
-	lecRepository, err := leagueoflegends.NewLolMatchRepository(leagueoflegends.LECLeagueID, "en-US")
+	lecRepository, err := leagueoflegends.NewLolMatchRepository(league.League{
+		ID: leagueoflegends.LECLeagueID,
+	}, "en-US")
 	if err != nil {
 		return MatchesByLeague{}, err
 	}
 
-	lflRepository, err := leagueoflegends.NewLolMatchRepository(leagueoflegends.LFLLeagueID, "en-US")
+	lflRepository, err := leagueoflegends.NewLolMatchRepository(league.League{
+		ID: leagueoflegends.LFLLeagueID,
+	}, "en-US")
+	if err != nil {
+		return MatchesByLeague{}, err
+	}
+
+	lolEumRepository, err := leagueoflegends.NewLolMatchRepository(league.League{
+		ID:   leagueoflegends.EmeaMastersLeagueID,
+		Name: "LFL",
+	}, "en-US")
+	if err != nil {
+		return MatchesByLeague{}, err
+	}
+
+	lolWorldsRepository, err := leagueoflegends.NewLolMatchRepository(league.League{
+		ID:   leagueoflegends.WorldsLeagueID,
+		Name: "LEC",
+	}, "en-US")
+	if err != nil {
+		return MatchesByLeague{}, err
+	}
+
+	lolMsiRepository, err := leagueoflegends.NewLolMatchRepository(league.League{
+		ID:   leagueoflegends.MSILeagueID,
+		Name: "LEC",
+	}, "en-US")
+	if err != nil {
+		return MatchesByLeague{}, err
+	}
+
+	lolFirstStandRepository, err := leagueoflegends.NewLolMatchRepository(league.League{
+		ID:   leagueoflegends.FirstStandLeagueID,
+		Name: "LEC",
+	}, "en-US")
 	if err != nil {
 		return MatchesByLeague{}, err
 	}
@@ -116,6 +152,9 @@ func getMatchesByLeague() (MatchesByLeague, error) {
 		ID:   valorant.VCTGC2025Stage1LeagueID, // TODO: Automatically get the league ID (because it will change really often)
 		Name: "VCT GC",
 	})
+	if err != nil {
+		return MatchesByLeague{}, err
+	}
 
 	rlRepository, err := rocketleague.NewRocketLeagueMatchRepository(time.Date(2021, 7, 20, 0, 0, 0, 0, time.UTC), cache)
 	if err != nil {
@@ -139,6 +178,10 @@ func getMatchesByLeague() (MatchesByLeague, error) {
 	ms := matchservice.NewMatchService([]match.Repository{
 		lecRepository,
 		lflRepository,
+		lolEumRepository,
+		lolWorldsRepository,
+		lolMsiRepository,
+		lolFirstStandRepository,
 		vclRepository,
 		vctRepository,
 		vctGcRepository,
