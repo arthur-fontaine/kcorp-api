@@ -140,8 +140,24 @@ func getMatchesByLeague() (MatchesByLeague, error) {
 		return MatchesByLeague{}, err
 	}
 
+	vclRepository2, err := valorant.NewValorantMatchRepository(league.League{
+		ID:   valorant.VCL2025Split2LeagueID, // TODO: Automatically get the league ID (because it will change really often)
+		Name: "VCL",
+	})
+	if err != nil {
+		return MatchesByLeague{}, err
+	}
+
 	vctRepository, err := valorant.NewValorantMatchRepository(league.League{
 		ID:   valorant.VCTKickoff2025LeagueID, // TODO: Automatically get the league ID (because it will change really often)
+		Name: "VCT",
+	})
+	if err != nil {
+		return MatchesByLeague{}, err
+	}
+
+	vctRepository2, err := valorant.NewValorantMatchRepository(league.League{
+		ID:   valorant.VCTStage12025LeagueID, // TODO: Automatically get the league ID (because it will change really often)
 		Name: "VCT",
 	})
 	if err != nil {
@@ -185,6 +201,8 @@ func getMatchesByLeague() (MatchesByLeague, error) {
 		vclRepository,
 		vctRepository,
 		vctGcRepository,
+		vclRepository2,
+		vctRepository2,
 		rlRepository,
 		lfl2Repository,
 		tftRepository,

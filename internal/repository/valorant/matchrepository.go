@@ -17,7 +17,9 @@ type valorantMatchRepository struct {
 
 const (
 	VCL2025LeagueID         = "2315"
+	VCL2025Split2LeagueID   = "2391"
 	VCTKickoff2025LeagueID  = "2276"
+	VCTStage12025LeagueID   = "2380"
 	VCTGC2025Stage1LeagueID = "2354"
 )
 
